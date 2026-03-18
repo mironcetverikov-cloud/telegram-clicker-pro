@@ -99,6 +99,30 @@ async def main():
     # Ожидание завершения задач
     await asyncio.gather(bot_task, server_task)
 
+@app.post("/api/game_result")
+async def handle_game_result(request: Request, init_data: str = ""):
+    data = await request.json()
+    bet = data.get("bet", 10)
+    win = data.get("win", False)
+    win_amount = data.get("win_amount", 0)
+    energy_used = data.get("energy_used", 10)
+    
+    # Получаем пользователя
+    user_telegram = get_user_from_init_data(init_data) if init_data else {"id": 12345}
+    telegram_id = user_telegram.get("id")
+    
+    user = await db.get_or_create_user(telegram_id)
+    
+    # Обновляем баланс и энергию
+    if win:
+        user["balance"] += win_amount
+    user["energy"] = max(0, user["energy"] - energy_used)
+    
+    await db.update_user_balance(user["id"], user["balance"])
+    await db.update_user_energy(user["id"], user["energy"])
+    
+    return {"success": True, "balance": user["balance"], "energy": user["energy"]}
+
 if __name__ == "__main__":
     try:
         asyncio.run(main())

@@ -3,208 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Clicker Pro</title>
+    <title>RedBird Clicker</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <!-- Баннер события -->
-    <div class="event-banner" id="event-banner" style="display:none;">
-        🎉 <span id="event-name"></span> x<span id="event-multiplier"></span>
-    </div>
-
-    <!-- Заголовок -->
     <div class="header">
         <div class="balance-container">
-            <span>💰</span>
+            <span class="coin-icon">🪙</span>
             <span id="balance">0</span>
         </div>
         <div class="stats-row">
             <div class="stat-item">⚡ <span id="pph">0</span>/час</div>
             <div class="stat-item">👆 <span id="ppc">1</span>/клик</div>
-            <div class="stat-item">🔥 <span id="streak">0</span> дней</div>
         </div>
     </div>
 
-    <!-- Область клика -->
-    <div class="mascot-container" id="click-area">
-        <img src="/static/images/mascot.png" alt="Clicker" id="mascot-img">
-        <div class="combo-meter" id="combo-meter" style="display:none;">
-            <span>COMBO x<span id="combo-count">1</span></span>
+    <!-- Раздел ИГРЫ -->
+    <div id="tab-game" class="screen active">
+        <div class="bet-section">
+            <label>💰 Ставка:</label>
+            <div class="bet-controls">
+                <button class="bet-btn" onclick="changeBet(-10)">-10</button>
+                <input type="number" id="bet-amount" value="10" min="1" max="1000">
+                <button class="bet-btn" onclick="changeBet(10)">+10</button>
+            </div>
+            <div class="bet-info">
+                <span>Выигрыш: x2</span>
+                <span id="potential-win">20</span>
+            </div>
         </div>
+
+        <div class="mascot-container" id="click-area">
+            <div class="rocket-wrapper">
+                <img src="https://cdn-icons-png.flaticon.com/512/1356/1356894.png" alt="Rocket" class="rocket-image" id="rocket">
+                <div class="rocket-flame" id="flame"></div>
+            </div>
+            <div class="click-effect" id="click-effect"></div>
+        </div>
+        
+        <div class="energy-container">
+            <div style="text-align:center; margin-bottom:5px;">
+                ⚡ Энергия: <span id="energy-text">1000/1000</span>
+            </div>
+            <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="energy-bar"></div>
+            </div>
+        </div>
+
+        <div class="game-result" id="game-result"></div>
     </div>
 
-    <!-- Энергия -->
-    <div class="energy-container">
-        <div class="energy-bar-bg">
-            <div class="energy-bar-fill" id="energy-bar"></div>
-        </div>
-        <div class="energy-text">
-            ⚡ <span id="energy-text">1000/1000</span>
-        </div>
-    </div>
-
-    <!-- Быстрые действия -->
-    <div class="quick-actions" id="quick-actions">
-        <button class="action-btn" onclick="showDaily()">📅 Ежедневно</button>
-        <button class="action-btn" onclick="showMinigames()">🎮 Мини-игры</button>
-    </div>
-
-    <!-- Экраны -->
-    <div id="tab-game" class="screen active"></div>
-
-    <div id="tab-boosts" class="screen">
+    <!-- Раздел БУСТЫ -->
+    <div id="tab-upgrades" class="screen">
         <h2>🚀 Улучшения</h2>
-        <div class="upgrade-list">
+        <div class="upgrades-list" id="upgrades-list">
             <div class="upgrade-item">
                 <div class="upgrade-info">
-                    <span class="upgrade-name">Мультитап</span>
+                    <span class="upgrade-name">💪 Сильный клик</span>
                     <span class="upgrade-desc">+1 к клику</span>
-                    <span class="upgrade-level" id="multitap-level">Ур. 0</span>
                 </div>
-                <button class="buy-btn" onclick="buyUpgrade('multitap')">100 💰</button>
+                <button class="buy-btn" onclick="buyUpgrade('click', 100)">Купить (100🪙)</button>
             </div>
             <div class="upgrade-item">
                 <div class="upgrade-info">
-                    <span class="upgrade-name">Энергия +500</span>
-                    <span class="upgrade-desc">+500 макс. энергии</span>
-                    <span class="upgrade-level" id="energy-level">Ур. 0</span>
+                    <span class="upgrade-name">⚡ Быстрая энергия</span>
+                    <span class="upgrade-desc">+100 энергии</span>
                 </div>
-                <button class="buy-btn" onclick="buyUpgrade('energy')">200 💰</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">Авто-кликер</span>
-                    <span class="upgrade-desc">+100/час</span>
-                    <span class="upgrade-level" id="auto-level">Ур. 0</span>
-                </div>
-                <button class="buy-btn" onclick="buyUpgrade('auto_clicker')">500 💰</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">Буст прибыли</span>
-                    <span class="upgrade-desc">+2 к клику, +50/час</span>
-                    <span class="upgrade-level" id="profit-level">Ур. 0</span>
-                </div>
-                <button class="buy-btn" onclick="buyUpgrade('profit_boost')">1000 💰</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">Лимит энергии</span>
-                    <span class="upgrade-desc">+1000 макс. энергии</span>
-                    <span class="upgrade-level" id="energy_limit-level">Ур. 0</span>
-                </div>
-                <button class="buy-btn" onclick="buyUpgrade('energy_limit')">1500 💰</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">Золотая кирка</span>
-                    <span class="upgrade-desc">+5 к клику, +200/час</span>
-                    <span class="upgrade-level" id="gold_pickaxe-level">Ур. 0</span>
-                </div>
-                <button class="buy-btn" onclick="buyUpgrade('gold_pickaxe')">5000 💰</button>
+                <button class="buy-btn" onclick="buyUpgrade('energy', 50)">Купить (50🪙)</button>
             </div>
         </div>
     </div>
 
-    <div id="tab-quests" class="screen">
-        <h2>📋 Активные квесты</h2>
-        <div id="quests-list"></div>
-        
-        <h2>🏆 Достижения</h2>
-        <div id="achievements-list"></div>
+    <!-- Раздел КОСТЮМЫ -->
+    <div id="tab-costumes" class="screen">
+        <h2>👔 Костюмы</h2>
+        <p style="text-align:center; color:#888;">Скоро...</p>
     </div>
 
-    <div id="tab-friends" class="screen">
-        <h2>👥 Друзья</h2>
-        <div class="referral-info">
-            <p>Пригласи друга и получи <b>5000 💰</b></p>
-            <button class="nav-btn invite-btn" onclick="shareLink()">Пригласить друга</button>
-            <p>Приглашено: <span id="referral-count">0</span> друзей</p>
-        </div>
-        
-        <h3>🏅 Топ игроков</h3>
-        <ul id="leaderboard-list" class="leaderboard"></ul>
-    </div>
-
-    <div id="tab-minigames" class="screen">
-        <h2>🎮 Мини-игры</h2>
-        <div class="minigame-list">
-            <div class="minigame-card" onclick="playMinigame('roulette')">
-                <div class="minigame-icon">🎰</div>
-                <h3>Рулетка</h3>
-                <p>Испытай удачу! Шанс 50%</p>
-            </div>
-            <div class="minigame-card" onclick="playMinigame('wheel')">
-                <div class="minigame-icon">🎡</div>
-                <h3>Колесо фортуны</h3>
-                <p>Крути и выигрывай!</p>
-            </div>
-            <div class="minigame-card" onclick="playMinigame('scratch')">
-                <div class="minigame-icon">🎫</div>
-                <h3>Скретч-карта</h3>
-                <p>Сотри и узнай приз!</p>
-            </div>
-            <div class="minigame-card" onclick="playMinigame('dice')">
-                <div class="minigame-icon">🎲</div>
-                <h3>Кости</h3>
-                <p>Брось кубик!</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Навигация -->
+    <!-- Нижняя навигация -->
     <div class="bottom-nav">
-        <button class="nav-btn active" data-tab="game">
-            <span class="nav-icon">🎮</span>
-            <span class="nav-text">Игра</span>
-        </button>
-        <button class="nav-btn" data-tab="boosts">
-            <span class="nav-icon">🚀</span>
-            <span class="nav-text">Бусты</span>
-        </button>
-        <button class="nav-btn" data-tab="quests">
-            <span class="nav-icon">📋</span>
-            <span class="nav-text">Квесты</span>
-        </button>
-        <button class="nav-btn" data-tab="friends">
-            <span class="nav-icon">👥</span>
-            <span class="nav-text">Топ</span>
-        </button>
-        <button class="nav-btn" data-tab="minigames">
-            <span class="nav-icon">🎲</span>
-            <span class="nav-text">Игры</span>
-        </button>
+        <button class="nav-btn active" data-tab="game">🎮 Игра</button>
+        <button class="nav-btn" data-tab="upgrades">🚀 Бусты</button>
+        <button class="nav-btn" data-tab="costumes">👔 Костюмы</button>
     </div>
-
-    <!-- Модальное окно: Ежедневная награда -->
-    <div id="modal-daily" class="modal">
-        <div class="modal-content">
-            <h3>📅 Ежедневная награда</h3>
-            <div class="daily-streak">
-                <span class="streak-number" id="daily-streak">0</span>
-                <span class="streak-label">дней подряд</span>
-            </div>
-            <div class="daily-reward">
-                <span class="reward-amount" id="daily-reward">0</span>
-                <span class="reward-label">монет</span>
-            </div>
-            <button class="claim-btn" onclick="claimDaily()">Забрать награду</button>
-            <button class="close-btn" onclick="closeModal('modal-daily')">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Модальное окно: Мини-игра -->
-    <div id="modal-minigame" class="modal">
-        <div class="modal-content">
-            <h3 id="minigame-title">🎮 Игра</h3>
-            <div id="minigame-content"></div>
-            <button class="close-btn" onclick="closeModal('modal-minigame')">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Уведомления -->
-    <div id="notification" class="notification"></div>
 
     <script src="/static/script.js"></script>
 </body>
